@@ -9,3 +9,5 @@ tsconfig.json
 package-lock.json
 assets/**
 branding/**
+.gitignore
+.nvmrc

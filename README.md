@@ -101,6 +101,10 @@ The image mode can also be changed with **MDominate: Toggle Image Paste Mode**.
 
 MDominate does not send document content or telemetry to an external service. Assets-mode images remain in your local workspace; Base64-mode images remain inside the Markdown file.
 
+## License
+
+MDominate is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE.md). Noncommercial use, inspection, modification, and sharing are permitted. Commercial use is not permitted.
+
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.

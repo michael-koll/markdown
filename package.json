@@ -4,6 +4,7 @@
   "description": "An Obsidian-like live WYSIWYG Markdown editor for VS Code.",
   "version": "0.0.40",
   "publisher": "MichaelKoll",
+  "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
     "vscode": "^1.93.0"
   },
