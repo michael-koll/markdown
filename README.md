@@ -101,22 +101,6 @@ The image mode can also be changed with **MDominate: Toggle Image Paste Mode**.
 
 MDominate does not send document content or telemetry to an external service. Assets-mode images remain in your local workspace; Base64-mode images remain inside the Markdown file.
 
-## Current Limitations
-
-- Code blocks use theme-aware rendering but do not reuse VS Code's language tokenization or syntax highlighting.
-- Image resizing is not provided because standard Markdown has no native image-size syntax.
-- Embedded HTML is sanitized before rendering and may not behave like arbitrary browser HTML.
-
-## Development
-
-```bash
-npm install
-npm run check
-npm run compile
-```
-
-Press `F5` in VS Code and select **Run MDominate** to launch an Extension Development Host.
-
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
