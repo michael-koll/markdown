@@ -1,0 +1,11 @@
+.vscode/**
+node_modules/**
+src/**
+esbuild.js
+scripts/**
+tsconfig.json
+**/*.map
+*.vsix
+package-lock.json
+assets/**
+branding/**

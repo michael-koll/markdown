@@ -1,0 +1,146 @@
+{
+  "name": "mdominate",
+  "displayName": "MDominate",
+  "description": "An Obsidian-like live WYSIWYG Markdown editor for VS Code.",
+  "version": "0.0.40",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "markdown",
+    "markdown editor",
+    "wysiwyg",
+    "live preview",
+    "obsidian",
+    "commonmark",
+    "gfm",
+    "github flavored markdown",
+    "notes",
+    "documentation",
+    "task lists",
+    "tables",
+    "images",
+    "image paste",
+    "base64",
+    "assets",
+    "offline",
+    "preview",
+    "editor"
+  ],
+  "preview": true,
+  "pricing": "Free",
+  "markdown": "github",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#18181b",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onCustomEditor:markdownWysiwyg.editor",
+    "onCommand:mdominate.toggle",
+    "onCommand:mdominate.toggleImagePasteMode",
+    "onCommand:markdownWysiwyg.toggle",
+    "onCommand:markdownWysiwyg.toggleImagePasteMode",
+    "onCommand:markdownWysiwyg.toggleEmbedPastedImages"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "mdominate.toggle",
+        "title": "MDominate: Toggle Live Preview",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "mdominate.toggleImagePasteMode",
+        "title": "MDominate: Toggle Image Paste Mode"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "mdominate.toggle",
+          "when": "resourceExtname == .md",
+          "group": "navigation@10"
+        }
+      ]
+    },
+    "customEditors": [
+      {
+        "viewType": "markdownWysiwyg.editor",
+        "displayName": "MDominate Live Preview",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "configuration": {
+      "title": "MDominate",
+      "properties": {
+        "mdominate.imagePasteMode": {
+          "type": "string",
+          "enum": [
+            "assets",
+            "base64"
+          ],
+          "enumDescriptions": [
+            "Save pasted images in an assets folder beside the Markdown document and insert a relative Markdown image link.",
+            "Embed pasted images directly in the Markdown document as base64 data URLs."
+          ],
+          "default": "assets",
+          "description": "Choose how images pasted into Live Preview are stored."
+        },
+        "mdominate.enableMarkdownWordWrap": {
+          "type": "boolean",
+          "default": true,
+          "description": "Turn on word wrap when opening Markdown in the source editor."
+        },
+        "markdownWysiwyg.imagePasteMode": {
+          "type": "string",
+          "enum": [
+            "assets",
+            "base64"
+          ],
+          "default": "assets",
+          "deprecationMessage": "Use mdominate.imagePasteMode instead.",
+          "description": "Legacy MDominate image paste setting."
+        },
+        "markdownWysiwyg.enableMarkdownWordWrap": {
+          "type": "boolean",
+          "default": true,
+          "deprecationMessage": "Use mdominate.enableMarkdownWordWrap instead.",
+          "description": "Legacy MDominate word wrap setting."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "check": "tsc --noEmit",
+    "package": "npm run compile && npx --yes @vscode/vsce@2.26.1 package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "1.93.0",
+    "esbuild": "^0.25.12",
+    "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
+    "@codemirror/commands": "^6.10.4",
+    "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.1",
+    "@codemirror/view": "^6.43.8",
+    "@lezer/markdown": "^1.7.2"
+  }
+}
