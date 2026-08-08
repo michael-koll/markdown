@@ -48,6 +48,7 @@
   "activationEvents": [
     "onCustomEditor:markdownplusplus.editor",
     "onCommand:markdownplusplus.toggle",
+    "onCommand:markdownplusplus.toggleLocal",
     "onCommand:markdownplusplus.toggleImagePasteMode"
   ],
   "main": "./dist/extension.js",
@@ -59,14 +60,25 @@
         "icon": "$(preview)"
       },
       {
+        "command": "markdownplusplus.toggleLocal",
+        "title": "Markdown++: Toggle Live Preview for Current File",
+        "icon": "$(preview)"
+      },
+      {
         "command": "markdownplusplus.toggleImagePasteMode",
         "title": "Markdown++: Toggle Image Paste Mode"
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "markdownplusplus.toggleLocal",
+          "when": "false"
+        }
+      ],
       "editor/title": [
         {
-          "command": "markdownplusplus.toggle",
+          "command": "markdownplusplus.toggleLocal",
           "when": "resourceExtname == .md",
           "group": "navigation@10"
         }
@@ -104,6 +116,11 @@
           "type": "boolean",
           "default": true,
           "description": "Turn on word wrap when opening Markdown in the source editor."
+        },
+        "markdownplusplus.globalLivePreview": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open newly opened Markdown files in Markdown++ Live Preview. The editor-title button remains a local per-file toggle."
         }
       }
     }

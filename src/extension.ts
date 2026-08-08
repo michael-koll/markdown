@@ -4,8 +4,12 @@ const VIEW_TYPE = 'markdownplusplus.editor';
 const CONFIG_SECTION = 'markdownplusplus';
 type ImagePasteMode = 'assets' | 'base64';
 const reservedImageTargets = new Set<string>();
+type LocalPreviewMode = 'source' | 'preview';
 
 export function activate(context: vscode.ExtensionContext): void {
+  let globalPreviewEnabled = getConfigurationValue<boolean>('globalLivePreview', false);
+  const localPreviewModes = new Map<string, LocalPreviewMode>();
+  const openingPreviews = new Set<string>();
   context.subscriptions.push(vscode.window.registerCustomEditorProvider(VIEW_TYPE, {
     async resolveCustomTextEditor(document, webviewPanel) {
       const webview = webviewPanel.webview;
@@ -133,10 +137,28 @@ export function activate(context: vscode.ExtensionContext): void {
   const toggleLivePreview = async (commandUri?: vscode.Uri) => {
     const { uri, isLivePreview } = getActiveMarkdownResource(commandUri);
     if (!uri) return;
-    if (isLivePreview) await openSource(uri);
-    else await vscode.commands.executeCommand('vscode.openWith', uri, VIEW_TYPE);
+    const key = uri.toString();
+    const isLocalButton = Boolean(commandUri);
+    if (isLocalButton) {
+      const next: LocalPreviewMode = isLivePreview ? 'source' : 'preview';
+      localPreviewModes.set(key, next);
+      if (next === 'source') await openSource(uri);
+      else await openPreview(uri, openingPreviews);
+      return;
+    }
+    globalPreviewEnabled = !globalPreviewEnabled;
+    await vscode.workspace.getConfiguration(CONFIG_SECTION).update('globalLivePreview', globalPreviewEnabled, vscode.ConfigurationTarget.Global);
+    localPreviewModes.clear();
+    if (globalPreviewEnabled) await openPreview(uri, openingPreviews);
+    else await openSource(uri);
+    void vscode.window.showInformationMessage(`Markdown++ global Live Preview: ${globalPreviewEnabled ? 'on' : 'off'}.`);
   };
   context.subscriptions.push(vscode.commands.registerCommand('markdownplusplus.toggle', toggleLivePreview));
+  const toggleLocalLivePreview = async () => {
+    const { uri } = getActiveMarkdownResource();
+    if (uri) await toggleLivePreview(uri);
+  };
+  context.subscriptions.push(vscode.commands.registerCommand('markdownplusplus.toggleLocal', toggleLocalLivePreview));
   const toggleImagePasteMode = async () => {
     const { uri } = getActiveMarkdownResource();
     const configuration = vscode.workspace.getConfiguration(CONFIG_SECTION, uri);
@@ -151,10 +173,27 @@ export function activate(context: vscode.ExtensionContext): void {
   };
   context.subscriptions.push(vscode.commands.registerCommand('markdownplusplus.toggleImagePasteMode', toggleImagePasteMode));
 
-  context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
-    if (editor?.document.uri.path.toLowerCase().endsWith('.md')) enableWordWrapSafely(editor.document.uri);
+  const openMarkdownInGlobalPreview = (document: vscode.TextDocument) => {
+    if (!globalPreviewEnabled || !document.uri.path.toLowerCase().endsWith('.md')) return;
+    const key = document.uri.toString();
+    if (localPreviewModes.get(key) === 'source') return;
+    void openPreview(document.uri, openingPreviews);
+  };
+  context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(openMarkdownInGlobalPreview));
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
+    if (!event.affectsConfiguration(`${CONFIG_SECTION}.globalLivePreview`)) return;
+    globalPreviewEnabled = getConfigurationValue<boolean>('globalLivePreview', false);
   }));
-  if (vscode.window.activeTextEditor) enableWordWrapSafely(vscode.window.activeTextEditor.document.uri);
+  context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
+    if (editor?.document.uri.path.toLowerCase().endsWith('.md')) {
+      enableWordWrapSafely(editor.document.uri);
+      openMarkdownInGlobalPreview(editor.document);
+    }
+  }));
+  if (vscode.window.activeTextEditor) {
+    enableWordWrapSafely(vscode.window.activeTextEditor.document.uri);
+    openMarkdownInGlobalPreview(vscode.window.activeTextEditor.document);
+  }
 }
 
 function isWebviewMessage(value: unknown): value is Record<string, unknown> & { type: string } {
@@ -229,6 +268,14 @@ async function openSource(uri: vscode.Uri): Promise<void> {
   await vscode.commands.executeCommand('vscode.openWith', uri, 'default');
 }
 
+async function openPreview(uri: vscode.Uri, openingPreviews: Set<string>): Promise<void> {
+  const key = uri.toString();
+  if (openingPreviews.has(key)) return;
+  openingPreviews.add(key);
+  try { await vscode.commands.executeCommand('vscode.openWith', uri, VIEW_TYPE); }
+  finally { openingPreviews.delete(key); }
+}
+
 function getActiveMarkdownResource(commandUri?: vscode.Uri): { uri?: vscode.Uri; isLivePreview: boolean } {
   const input = vscode.window.tabGroups.activeTabGroup.activeTab?.input as { uri?: vscode.Uri; viewType?: string } | undefined;
   const uri = commandUri ?? vscode.window.activeTextEditor?.document.uri ?? input?.uri;
@@ -257,7 +304,7 @@ function getHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
 }
 
 function styles(): string { return `
-  :root{color-scheme:dark;--bg:#1e1e1e;--surface:#171717;--line:#3c3c3c;--text:#d4d4d4;--accent:#7aa2f7}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}main{max-width:920px;margin:auto;padding:34px 48px 120px}.cm-editor{outline:none}.cm-scroller{font:inherit;line-height:1.6;overflow-x:hidden!important}.cm-content{caret-color:#fff!important;padding-bottom:120px}.cm-line{padding:0 2px;min-height:1.6em}.cm-line.cm-setext-marker-line{height:0!important;min-height:0!important;line-height:0!important;padding:0!important;overflow:hidden}.cm-selectionBackground,.cm-content ::selection{background:#264f78!important}.cm-editor.cm-focused .cm-cursor,.cm-dropCursor{border-left:2px solid #fff!important}.cm-fat-cursor{background:#fff!important;color:#111!important}.cm-md-heading-1{font-size:2em;line-height:1.25;font-weight:700}.cm-md-heading-2{font-size:1.5em;line-height:1.25;font-weight:700}.cm-md-heading-3{font-size:1.25em;line-height:1.3;font-weight:700}.cm-md-heading-4{font-size:1.1em;line-height:1.35;font-weight:700}.cm-md-heading-5{font-size:1em;line-height:1.4;font-weight:700}.cm-md-heading-6{font-size:.9em;line-height:1.45;font-weight:700;color:var(--vscode-descriptionForeground,var(--text))}.cm-md-heading-1,.cm-md-heading-2,.cm-md-heading-3,.cm-md-heading-4,.cm-md-heading-5,.cm-md-heading-6{margin-left:0}.cm-md-strong{font-weight:700}.cm-md-emphasis{font-style:italic}.cm-md-strikethrough{text-decoration:line-through}.cm-md-inline-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#2a2a2a;color:#e7c680;border-radius:4px;padding:.08em .3em;line-height:1.35;box-decoration-break:clone;-webkit-box-decoration-break:clone}.cm-link-widget{color:var(--accent);text-decoration:underline;text-underline-offset:2px;cursor:pointer}.cm-horizontal-rule{display:inline-block;width:100%;height:1.6em;border-top:1px solid var(--line);transform:translateY(.8em);vertical-align:top}.cm-md-codeblock{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.cm-line.cm-md-code-line{background:var(--surface);padding-left:14px;padding-right:14px}.cm-line.cm-md-code-first{position:relative;border-radius:6px 6px 0 0;padding-top:8px}.cm-line.cm-md-code-last{border-radius:0 0 6px 6px;padding-bottom:12px}.copy-code{position:absolute;right:8px;top:6px;z-index:2;background:#292929dd;border:1px solid #555;color:var(--text);border-radius:4px;padding:2px 7px;cursor:pointer;opacity:.25}.cm-md-code-first:hover .copy-code,.copy-code:focus{opacity:1}.cm-list-marker{display:inline;color:var(--text)}.cm-task-checkbox{appearance:none;width:16px;height:16px;margin:0 8px 0 0;border:1.5px solid #777;border-radius:4px;background:transparent;vertical-align:middle;transform:translateY(-1px);cursor:pointer}.cm-task-checkbox:checked{background:var(--accent);border-color:var(--accent)}.cm-task-checkbox:checked:after{content:'✓';display:block;color:#111;font:bold 13px/14px sans-serif;text-align:center}.cm-line.cm-quote-line{border-left:3px solid #5c6370;padding-left:14px;color:#b8bcc5}.cm-line.cm-quote-first{padding-top:4px}.cm-line.cm-quote-last{padding-bottom:4px}.cm-table-widget{display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;margin:.65em 0;padding-bottom:3px}.cm-table-widget table{width:max-content;min-width:100%;border-collapse:collapse;table-layout:auto}.cm-table-widget th,.cm-table-widget td{min-width:11rem;padding:6px 10px;border:1px solid var(--line);text-align:left;white-space:nowrap}.cm-table-widget th{font-weight:700;background:#272727}.cm-table-widget::-webkit-scrollbar{height:9px}.cm-table-widget::-webkit-scrollbar-thumb{background:#555;border-radius:5px}.cm-table-widget::-webkit-scrollbar-track{background:#252525}.cm-image-widget{position:relative;display:inline-block;max-width:100%;line-height:0;vertical-align:middle}.cm-image-widget img{max-width:100%;vertical-align:middle}.cm-html-widget{color:inherit}.cm-html-block{display:block;margin:.5em 0}.cm-html-widget kbd{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.08em .38em;box-shadow:0 1px 0 var(--line)}.cm-html-widget details{padding:.5em .75em;border:1px solid var(--line);border-radius:6px}.cm-tooltip-autocomplete{background:#252525!important;border:1px solid #474747!important;border-radius:7px!important;box-shadow:0 8px 24px #0008!important;overflow:hidden}.cm-tooltip-autocomplete>ul{font-family:inherit!important;max-height:280px!important}.cm-tooltip-autocomplete>ul>li{padding:6px 10px!important;color:var(--text)!important}.cm-tooltip-autocomplete>ul>li[aria-selected]{background:#3b4261!important;color:#fff!important}.cm-completionLabel{font-weight:600}.cm-completionDetail{color:#aaa;font-style:normal!important;margin-left:12px!important}`; }
+  :root{color-scheme:dark;--bg:#1e1e1e;--surface:#171717;--line:#3c3c3c;--text:#d4d4d4;--accent:#7aa2f7}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}main{max-width:920px;margin:auto;padding:34px 48px 120px}.cm-editor{outline:none}.cm-scroller{font:inherit;line-height:1.6;overflow-x:hidden!important}.cm-content{caret-color:#fff!important;padding-bottom:120px}.cm-line{padding:0 2px;min-height:1.6em}.cm-line.cm-setext-marker-line{height:0!important;min-height:0!important;line-height:0!important;padding:0!important;overflow:hidden}.cm-selectionBackground,.cm-content ::selection{background:#264f78!important}.cm-editor.cm-focused .cm-cursor,.cm-dropCursor{border-left:2px solid #fff!important}.cm-fat-cursor{background:#fff!important;color:#111!important}.cm-md-heading-1{font-size:2em;line-height:1.25;font-weight:700}.cm-md-heading-2{font-size:1.5em;line-height:1.25;font-weight:700}.cm-md-heading-3{font-size:1.25em;line-height:1.3;font-weight:700}.cm-md-heading-4{font-size:1.1em;line-height:1.35;font-weight:700}.cm-md-heading-5{font-size:1em;line-height:1.4;font-weight:700}.cm-md-heading-6{font-size:.9em;line-height:1.45;font-weight:700;color:var(--vscode-descriptionForeground,var(--text))}.cm-md-heading-1,.cm-md-heading-2,.cm-md-heading-3,.cm-md-heading-4,.cm-md-heading-5,.cm-md-heading-6{margin-left:0}.cm-md-heading-line-1{padding-top:.6em!important;padding-bottom:.45em!important}.cm-md-heading-line-2{padding-top:.5em!important;padding-bottom:.38em!important}.cm-md-heading-line-3{padding-top:.4em!important;padding-bottom:.3em!important}.cm-md-heading-line-4{padding-top:.32em!important;padding-bottom:.24em!important}.cm-md-heading-line-5{padding-top:.25em!important;padding-bottom:.2em!important}.cm-md-heading-line-6{padding-top:.2em!important;padding-bottom:.16em!important}.cm-md-strong{font-weight:700;color:var(--accent)}.cm-md-emphasis{font-style:italic}.cm-md-strikethrough{text-decoration:line-through}.cm-md-inline-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#2a2a2a;color:#e7c680;border-radius:4px;padding:.08em .3em;line-height:1.35;box-decoration-break:clone;-webkit-box-decoration-break:clone}.cm-link-widget{color:var(--accent);text-decoration:underline;text-underline-offset:2px;cursor:pointer}.cm-horizontal-rule{display:inline-block;width:100%;height:1.6em;border-top:1px solid var(--line);transform:translateY(.8em);vertical-align:top}.cm-md-codeblock{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.cm-line.cm-md-code-line{background:var(--surface);padding-left:14px;padding-right:14px}.cm-line.cm-md-code-first{position:relative;border-radius:6px 6px 0 0;padding-top:8px}.cm-line.cm-md-code-last{border-radius:0 0 6px 6px;padding-bottom:12px}.copy-code{position:absolute;right:8px;top:6px;z-index:2;background:#292929dd;border:1px solid #555;color:var(--text);border-radius:4px;padding:2px 7px;cursor:pointer;opacity:.25}.cm-md-code-first:hover .copy-code,.copy-code:focus{opacity:1}.cm-list-marker{display:inline;color:var(--text)}.cm-task-checkbox{appearance:none;width:16px;height:16px;margin:0 8px 0 0;border:1.5px solid #777;border-radius:4px;background:transparent;vertical-align:middle;transform:translateY(-1px);cursor:pointer}.cm-task-checkbox:checked{background:var(--accent);border-color:var(--accent)}.cm-task-checkbox:checked:after{content:'✓';display:block;color:#111;font:bold 13px/14px sans-serif;text-align:center}.cm-line.cm-quote-line{border-left:3px solid #5c6370;padding-left:14px;color:#b8bcc5}.cm-line.cm-quote-first{padding-top:4px}.cm-line.cm-quote-last{padding-bottom:4px}.cm-table-widget{display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;margin:.65em 0;padding-bottom:3px}.cm-table-widget table{width:max-content;min-width:100%;border-collapse:collapse;table-layout:auto}.cm-table-widget th,.cm-table-widget td{min-width:11rem;padding:6px 10px;border:1px solid var(--line);text-align:left;white-space:nowrap}.cm-table-widget th{font-weight:700;background:#272727}.cm-table-strong{font-weight:700;color:var(--accent)}.cm-table-widget::-webkit-scrollbar{height:9px}.cm-table-widget::-webkit-scrollbar-thumb{background:#555;border-radius:5px}.cm-table-widget::-webkit-scrollbar-track{background:#252525}.cm-image-widget{position:relative;display:inline-block;max-width:100%;line-height:0;vertical-align:middle}.cm-image-widget img{max-width:100%;vertical-align:middle}.cm-html-widget{color:inherit}.cm-html-block{display:block;margin:.5em 0}.cm-html-widget kbd{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.08em .38em;box-shadow:0 1px 0 var(--line)}.cm-html-widget details{padding:.5em .75em;border:1px solid var(--line);border-radius:6px}.cm-tooltip-autocomplete{background:#252525!important;border:1px solid #474747!important;border-radius:7px!important;box-shadow:0 8px 24px #0008!important;overflow:hidden}.cm-tooltip-autocomplete>ul{font-family:inherit!important;max-height:280px!important}.cm-tooltip-autocomplete>ul>li{padding:6px 10px!important;color:var(--text)!important}.cm-tooltip-autocomplete>ul>li[aria-selected]{background:#3b4261!important;color:#fff!important}.cm-completionLabel{font-weight:600}.cm-completionDetail{color:#aaa;font-style:normal!important;margin-left:12px!important}`; }
 
 function themeStyles(): string { return `
   :root{color-scheme:light dark;--bg:var(--vscode-editor-background,#1e1e1e);--surface:var(--vscode-textCodeBlock-background,var(--vscode-editorWidget-background,#171717));--line:var(--vscode-panel-border,var(--vscode-editorWidget-border,#3c3c3c));--text:var(--vscode-editor-foreground,#d4d4d4);--accent:var(--vscode-textLink-foreground,#3794ff);--horizontal-rule-color:color-mix(in srgb,var(--vscode-editor-foreground,#d4d4d4) 32%,var(--vscode-editor-background,#1e1e1e));--code-block-border:var(--vscode-contrastBorder,color-mix(in srgb,var(--vscode-editor-foreground,#d4d4d4) 24%,var(--vscode-editor-background,#1e1e1e)))}

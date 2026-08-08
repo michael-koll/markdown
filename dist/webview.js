@@ -26299,7 +26299,7 @@ Ctrl+Click to open`;
         const row = section.insertRow();
         cells.forEach(({ value, position }) => {
           const cell = rowIndex === 0 ? document.createElement("th") : document.createElement("td");
-          cell.textContent = value || "\xA0";
+          renderTableCell(cell, value);
           cell.dataset.position = String(position);
           cell.dataset.length = String(value.length);
           cell.addEventListener("mousedown", (event) => {
@@ -26327,21 +26327,49 @@ Ctrl+Click to open`;
     }
   };
   function characterOffsetAtX(cell, clientX, maximum) {
-    const textNode = cell.firstChild;
-    if (!(textNode instanceof Text) || maximum === 0) return 0;
+    if (maximum === 0) return 0;
+    const textNodes = [];
+    const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT);
+    let current;
+    while (current = walker.nextNode()) if (current instanceof Text) textNodes.push(current);
+    if (!textNodes.length) return 0;
     const range = document.createRange();
     let closest = 0;
     let distance = Number.POSITIVE_INFINITY;
-    for (let offset = 0; offset <= maximum; offset++) {
-      range.setStart(textNode, Math.min(offset, textNode.length));
-      range.collapse(true);
-      const currentDistance = Math.abs(range.getBoundingClientRect().left - clientX);
-      if (currentDistance < distance) {
-        distance = currentDistance;
-        closest = offset;
+    let documentOffset = 0;
+    for (const textNode of textNodes) {
+      for (let offset = 0; offset <= textNode.length; offset++) {
+        range.setStart(textNode, offset);
+        range.collapse(true);
+        const currentDistance = Math.abs(range.getBoundingClientRect().left - clientX);
+        if (currentDistance < distance) {
+          distance = currentDistance;
+          closest = documentOffset + offset;
+        }
       }
+      documentOffset += textNode.length;
     }
-    return closest;
+    return Math.min(closest, maximum);
+  }
+  function renderTableCell(cell, value) {
+    if (!value) {
+      cell.textContent = "\xA0";
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    const pattern = /(\*\*|__)(?=\S)([\s\S]*?\S)\1/g;
+    let cursor = 0;
+    let match;
+    while (match = pattern.exec(value)) {
+      if (match.index > cursor) fragment.append(document.createTextNode(value.slice(cursor, match.index)));
+      const strong = document.createElement("strong");
+      strong.className = "cm-table-strong";
+      strong.textContent = match[2];
+      fragment.append(strong);
+      cursor = match.index + match[0].length;
+    }
+    if (cursor < value.length) fragment.append(document.createTextNode(value.slice(cursor)));
+    cell.replaceChildren(fragment);
   }
   function documentPositionAtPoint(editorView, clientX, clientY) {
     const bounds = editorView.contentDOM.getBoundingClientRect();
@@ -26570,14 +26598,13 @@ Ctrl+Click to open`;
           }
         }
       }
-      if (node.name === "ATXHeading1") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-heading-1" }) });
-      if (node.name === "ATXHeading2") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-heading-2" }) });
-      if (node.name === "ATXHeading3") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-heading-3" }) });
-      if (node.name === "ATXHeading4") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-heading-4" }) });
-      if (node.name === "ATXHeading5") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-heading-5" }) });
-      if (node.name === "ATXHeading6") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-heading-6" }) });
-      if (node.name === "SetextHeading1") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-heading-1" }) });
-      if (node.name === "SetextHeading2" && !isSingleDashSetext(view2.state, node.from, node.to)) additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-heading-2" }) });
+      let headingClass = /^ATXHeading([1-6])$/.exec(node.name)?.[1];
+      if (!headingClass && node.name === "SetextHeading1") headingClass = "1";
+      if (!headingClass && node.name === "SetextHeading2" && !isSingleDashSetext(view2.state, node.from, node.to)) headingClass = "2";
+      if (headingClass) {
+        additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: `cm-md-heading-${headingClass}` }) });
+        additions.push({ from: node.from, to: node.from, decoration: Decoration.line({ class: `cm-md-heading-line-${headingClass}` }) });
+      }
       if (node.name === "StrongEmphasis") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-strong" }) });
       if (node.name === "Emphasis") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-emphasis" }) });
       if (node.name === "Strikethrough") additions.push({ from: node.from, to: node.to, decoration: Decoration.mark({ class: "cm-md-strikethrough" }) });
