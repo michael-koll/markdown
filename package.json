@@ -2,7 +2,7 @@
   "name": "markdownplusplus",
   "displayName": "Markdown++",
   "description": "An Obsidian-like live WYSIWYG Markdown editor for VS Code.",
-  "version": "0.0.40",
+  "version": "0.0.41",
   "publisher": "MichaelKoll",
   "license": "SEE LICENSE IN LICENSE.md",
   "engines": {
