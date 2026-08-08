@@ -68,7 +68,6 @@ Run **Markdown++: Toggle Image Paste Mode** from the Command Palette to switch m
 - `Tab` and `Shift+Tab` indent and outdent list items.
 - Arrow keys move through document lines and enter or leave editable block content as needed.
 - `Ctrl+Z` / `Ctrl+Y` on Windows and Linux, or the corresponding macOS shortcuts, undo and redo individual changes.
-- `Ctrl/Cmd+B` toggles bold, `Ctrl/Cmd+I` toggles italic, and `Ctrl/Cmd+Shift+X` toggles strikethrough around the selection or current word.
 - Completed task-list items are dimmed and struck through in Live Preview.
 - `Ctrl+Click` / `Cmd+Click` opens rendered links.
 

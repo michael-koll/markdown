@@ -2,9 +2,13 @@
 
 All notable changes to Markdown++ are documented in this file.
 
+## 0.0.42
+
+- Removed the experimental formatting keyboard shortcuts.
+- Kept theme-colored bold text, improved table-cell inline formatting, proportional heading spacing, and separate global/per-file Live Preview toggles.
+
 ## 0.0.41
 
-- Added `Ctrl/Cmd+B` for bold, `Ctrl/Cmd+I` for italic, and `Ctrl/Cmd+Shift+X` for strikethrough.
 - Added theme-colored bold text and improved table-cell inline formatting.
 - Added proportional spacing after headings.
 - Added separate global and per-file Live Preview toggles.

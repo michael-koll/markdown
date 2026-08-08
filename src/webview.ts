@@ -1,4 +1,4 @@
-import { EditorSelection, EditorState, StateField, Transaction } from '@codemirror/state';
+import { EditorState, StateField, Transaction } from '@codemirror/state';
 import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType, keymap } from '@codemirror/view';
 import { markdown } from '@codemirror/lang-markdown';
 import { syntaxTree } from '@codemirror/language';
@@ -668,30 +668,6 @@ function createTable(columns: number, rows: number): string {
   return [header, separator, ...body].join('\n');
 }
 
-function toggleMarkup(editorView: EditorView, marker: string): boolean {
-  const selections = editorView.state.selection.ranges;
-  const changes: Array<{ from: number; to: number; insert: string }> = [];
-  const nextSelections: Array<{ anchor: number; head: number }> = [];
-  for (const selection of selections) {
-    const range = selection.empty ? editorView.state.wordAt(selection.head) : selection;
-    if (!range) return false;
-    const selected = editorView.state.sliceDoc(range.from, range.to);
-    const hasMarkers = selected.startsWith(marker) && selected.endsWith(marker) && selected.length >= marker.length * 2;
-    const insert = hasMarkers ? selected.slice(marker.length, -marker.length) : `${marker}${selected}${marker}`;
-    changes.push({ from: range.from, to: range.to, insert });
-    nextSelections.push({
-      anchor: range.from + (hasMarkers ? 0 : marker.length),
-      head: range.to + (hasMarkers ? -marker.length : marker.length)
-    });
-  }
-  const changeSet = editorView.state.changes(changes);
-  const mappedSelections = nextSelections.map(selection => EditorSelection.range(
-    changeSet.mapPos(selection.anchor), changeSet.mapPos(selection.head)
-  ));
-  editorView.dispatch({ changes: changeSet, selection: EditorSelection.create(mappedSelections) });
-  return true;
-}
-
 function insertCodeBlock(editorView: EditorView, _completion: Completion, from: number, to: number): void {
   const source = '```\n\n```';
   editorView.dispatch({ changes: { from, to, insert: source }, selection: { anchor: from + 4 } });
@@ -818,7 +794,7 @@ function moveByDocumentLine(editorView: EditorView, direction: -1 | 1): boolean 
 }
 
 const view = new EditorView({
-  state: EditorState.create({ doc: '', extensions: [markdown({ extensions: [GFM], addKeymap: false }), history(), closeBrackets(), autocompletion({ override: [slashCompletions], activateOnTyping: true, icons: false }), keymap.of([{ key: 'Mod-b', run: view => toggleMarkup(view, '**') }, { key: 'Mod-i', run: view => toggleMarkup(view, '*') }, { key: 'Mod-Shift-x', run: view => toggleMarkup(view, '~~') }, ...completionKeymap.filter(binding => binding.key !== 'Enter'), { key: 'Mod-z', run: undo }, { key: 'Mod-y', run: redo }, { key: 'Mod-Shift-z', run: redo }, { key: 'ArrowUp', run: view => moveByDocumentLine(view, -1) }, { key: 'ArrowDown', run: view => moveByDocumentLine(view, 1) }, { key: 'Tab', run: view => indentListItem(view, false) }, { key: 'Shift-Tab', run: view => indentListItem(view, true) }, ...closeBracketsKeymap, ...defaultKeymap.filter(binding => binding.key !== 'Enter'), ...historyKeymap]), tableDecorations, livePreview, EditorView.lineWrapping, EditorView.updateListener.of(update => {
+  state: EditorState.create({ doc: '', extensions: [markdown({ extensions: [GFM], addKeymap: false }), history(), closeBrackets(), autocompletion({ override: [slashCompletions], activateOnTyping: true, icons: false }), keymap.of([...completionKeymap.filter(binding => binding.key !== 'Enter'), { key: 'Mod-z', run: undo }, { key: 'Mod-y', run: redo }, { key: 'Mod-Shift-z', run: redo }, { key: 'ArrowUp', run: view => moveByDocumentLine(view, -1) }, { key: 'ArrowDown', run: view => moveByDocumentLine(view, 1) }, { key: 'Tab', run: view => indentListItem(view, false) }, { key: 'Shift-Tab', run: view => indentListItem(view, true) }, ...closeBracketsKeymap, ...defaultKeymap.filter(binding => binding.key !== 'Enter'), ...historyKeymap]), tableDecorations, livePreview, EditorView.lineWrapping, EditorView.updateListener.of(update => {
     if (!update.docChanged) return;
     for (const [requestId, range] of pendingImagePastes) {
       pendingImagePastes.set(requestId, { from: update.changes.mapPos(range.from, -1), to: update.changes.mapPos(range.to, -1) });
