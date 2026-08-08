@@ -7,7 +7,7 @@ All notable changes to Markdown++ are documented in this file.
 - Renamed and branded the extension as Markdown++.
 - Added Marketplace metadata, searchable Markdown-related keywords, and complete English feature documentation.
 - Added the public `Markdown++: Toggle Live Preview` and `Markdown++: Toggle Image Paste Mode` commands.
-- Added the `markdownPlusPlus.imagePasteMode` and `markdownPlusPlus.enableMarkdownWordWrap` settings while retaining compatibility with previous setting and command identifiers.
+- Added the `markdownplusplus.imagePasteMode` and `markdownplusplus.enableMarkdownWordWrap` settings.
 - Kept the assets-folder image workflow as the default and Base64 embedding as an optional mode.
 
 ## 0.0.39

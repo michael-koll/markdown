@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 
-const VIEW_TYPE = 'markdownPlusPlus.editor';
-const CONFIG_SECTION = 'markdownPlusPlus';
-const LEGACY_CONFIG_SECTION = 'markdownWysiwyg';
+const VIEW_TYPE = 'markdownplusplus.editor';
+const CONFIG_SECTION = 'markdownplusplus';
 type ImagePasteMode = 'assets' | 'base64';
 const reservedImageTargets = new Set<string>();
 
@@ -31,8 +30,7 @@ export function activate(context: vscode.ExtensionContext): void {
         if (event.document.uri.toString() === document.uri.toString() && !applyingChange) sendDocument();
       });
       const configListener = vscode.workspace.onDidChangeConfiguration(event => {
-        if (event.affectsConfiguration(`${CONFIG_SECTION}.imagePasteMode`, document.uri)
-          || event.affectsConfiguration(`${LEGACY_CONFIG_SECTION}.imagePasteMode`, document.uri)) {
+        if (event.affectsConfiguration(`${CONFIG_SECTION}.imagePasteMode`, document.uri)) {
           webview.postMessage({ type: 'config', imagePasteMode: getImagePasteMode(document.uri) });
         }
       });
@@ -138,8 +136,7 @@ export function activate(context: vscode.ExtensionContext): void {
     if (isLivePreview) await openSource(uri);
     else await vscode.commands.executeCommand('vscode.openWith', uri, VIEW_TYPE);
   };
-  context.subscriptions.push(vscode.commands.registerCommand('markdownPlusPlus.toggle', toggleLivePreview));
-  context.subscriptions.push(vscode.commands.registerCommand('markdownWysiwyg.toggle', toggleLivePreview));
+  context.subscriptions.push(vscode.commands.registerCommand('markdownplusplus.toggle', toggleLivePreview));
   const toggleImagePasteMode = async () => {
     const { uri } = getActiveMarkdownResource();
     const configuration = vscode.workspace.getConfiguration(CONFIG_SECTION, uri);
@@ -152,10 +149,7 @@ export function activate(context: vscode.ExtensionContext): void {
     await configuration.update('imagePasteMode', next, target);
     void vscode.window.showInformationMessage(`Markdown++ image paste mode: ${next === 'assets' ? 'Assets folder' : 'Base64 embedding'}.`);
   };
-  context.subscriptions.push(vscode.commands.registerCommand('markdownPlusPlus.toggleImagePasteMode', toggleImagePasteMode));
-  context.subscriptions.push(vscode.commands.registerCommand('markdownWysiwyg.toggleImagePasteMode', toggleImagePasteMode));
-  // Keep existing keybindings and command invocations working after the command rename.
-  context.subscriptions.push(vscode.commands.registerCommand('markdownWysiwyg.toggleEmbedPastedImages', toggleImagePasteMode));
+  context.subscriptions.push(vscode.commands.registerCommand('markdownplusplus.toggleImagePasteMode', toggleImagePasteMode));
 
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
     if (editor?.document.uri.path.toLowerCase().endsWith('.md')) enableWordWrapSafely(editor.document.uri);
@@ -179,8 +173,7 @@ function getConfigurationValue<T>(key: string, fallback: T, uri?: vscode.Uri): T
     || inspected?.workspaceFolderValue !== undefined;
   return hasCurrentValue
     ? configuration.get<T>(key, fallback)
-    : vscode.workspace.getConfiguration(LEGACY_CONFIG_SECTION, uri).get<T>(key,
-      fallback);
+    : fallback;
 }
 
 async function savePastedImage(documentUri: vscode.Uri, dataUrl: string, originalName: string): Promise<string> {

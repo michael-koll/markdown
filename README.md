@@ -92,8 +92,8 @@ The Live Preview is designed around native Markdown. Image resizing metadata and
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `markdownPlusPlus.imagePasteMode` | `assets` | Saves pasted images in a neighboring `assets` folder or embeds them as `base64`. |
-| `markdownPlusPlus.enableMarkdownWordWrap` | `true` | Enables word wrapping when Markdown files are opened in the regular source editor. |
+| `markdownplusplus.imagePasteMode` | `assets` | Saves pasted images in a neighboring `assets` folder or embeds them as `base64`. |
+| `markdownplusplus.enableMarkdownWordWrap` | `true` | Enables word wrapping when Markdown files are opened in the regular source editor. |
 
 The image mode can also be changed with **Markdown++: Toggle Image Paste Mode**.
 

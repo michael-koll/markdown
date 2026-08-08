@@ -1,5 +1,5 @@
 {
-  "name": "markdown-plus-plus",
+  "name": "markdownplusplus",
   "displayName": "Markdown++",
   "description": "An Obsidian-like live WYSIWYG Markdown editor for VS Code.",
   "version": "0.0.40",
@@ -46,30 +46,27 @@
     "theme": "dark"
   },
   "activationEvents": [
-    "onCustomEditor:markdownPlusPlus.editor",
-    "onCommand:markdownPlusPlus.toggle",
-    "onCommand:markdownPlusPlus.toggleImagePasteMode",
-    "onCommand:markdownWysiwyg.toggle",
-    "onCommand:markdownWysiwyg.toggleImagePasteMode",
-    "onCommand:markdownWysiwyg.toggleEmbedPastedImages"
+    "onCustomEditor:markdownplusplus.editor",
+    "onCommand:markdownplusplus.toggle",
+    "onCommand:markdownplusplus.toggleImagePasteMode"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "markdownPlusPlus.toggle",
+        "command": "markdownplusplus.toggle",
         "title": "Markdown++: Toggle Live Preview",
         "icon": "$(preview)"
       },
       {
-        "command": "markdownPlusPlus.toggleImagePasteMode",
+        "command": "markdownplusplus.toggleImagePasteMode",
         "title": "Markdown++: Toggle Image Paste Mode"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "markdownPlusPlus.toggle",
+          "command": "markdownplusplus.toggle",
           "when": "resourceExtname == .md",
           "group": "navigation@10"
         }
@@ -77,7 +74,7 @@
     },
     "customEditors": [
       {
-        "viewType": "markdownPlusPlus.editor",
+        "viewType": "markdownplusplus.editor",
         "displayName": "Markdown++ Live Preview",
         "selector": [
           {
@@ -90,7 +87,7 @@
     "configuration": {
       "title": "Markdown++",
       "properties": {
-        "markdownPlusPlus.imagePasteMode": {
+        "markdownplusplus.imagePasteMode": {
           "type": "string",
           "enum": [
             "assets",
@@ -103,26 +100,10 @@
           "default": "assets",
           "description": "Choose how images pasted into Live Preview are stored."
         },
-        "markdownPlusPlus.enableMarkdownWordWrap": {
+        "markdownplusplus.enableMarkdownWordWrap": {
           "type": "boolean",
           "default": true,
           "description": "Turn on word wrap when opening Markdown in the source editor."
-        },
-        "markdownWysiwyg.imagePasteMode": {
-          "type": "string",
-          "enum": [
-            "assets",
-            "base64"
-          ],
-          "default": "assets",
-          "deprecationMessage": "Use markdownPlusPlus.imagePasteMode instead.",
-          "description": "Legacy Markdown++ image paste setting."
-        },
-        "markdownWysiwyg.enableMarkdownWordWrap": {
-          "type": "boolean",
-          "default": true,
-          "deprecationMessage": "Use markdownPlusPlus.enableMarkdownWordWrap instead.",
-          "description": "Legacy Markdown++ word wrap setting."
         }
       }
     }
