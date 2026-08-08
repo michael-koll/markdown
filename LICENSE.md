@@ -1,6 +1,6 @@
-# MDominate License
+# Markdown++ License
 
-MDominate is licensed under the **PolyForm Noncommercial License 1.0.0**.
+Markdown++ is licensed under the **PolyForm Noncommercial License 1.0.0**.
 
 You may inspect, use, modify, and share this software for noncommercial purposes, including personal projects, research, education, testing, and hobby projects. Commercial use, commercial distribution, selling, sublicensing, or using the software to provide a commercial service are not permitted under this license.
 

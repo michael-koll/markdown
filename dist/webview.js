@@ -26462,7 +26462,7 @@ Ctrl+Click to open`;
   var reportedRenderErrors = /* @__PURE__ */ new Set();
   function reportRenderError(area, error) {
     const message = (error instanceof Error ? error.message : String(error)).slice(0, 1e3);
-    console.error(`MDominate ${area} error:`, error);
+    console.error(`Markdown++ ${area} error:`, error);
     const key = `${area}:${message}`;
     if (reportedRenderErrors.has(key)) return;
     if (reportedRenderErrors.size >= 50) reportedRenderErrors.delete(reportedRenderErrors.values().next().value);

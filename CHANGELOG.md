@@ -1,13 +1,13 @@
 # Change Log
 
-All notable changes to MDominate are documented in this file.
+All notable changes to Markdown++ are documented in this file.
 
 ## 0.0.40
 
-- Renamed and branded the extension as MDominate.
+- Renamed and branded the extension as Markdown++.
 - Added Marketplace metadata, searchable Markdown-related keywords, and complete English feature documentation.
-- Added the public `MDominate: Toggle Live Preview` and `MDominate: Toggle Image Paste Mode` commands.
-- Added the `mdominate.imagePasteMode` and `mdominate.enableMarkdownWordWrap` settings while retaining compatibility with previous setting and command identifiers.
+- Added the public `Markdown++: Toggle Live Preview` and `Markdown++: Toggle Image Paste Mode` commands.
+- Added the `markdownPlusPlus.imagePasteMode` and `markdownPlusPlus.enableMarkdownWordWrap` settings while retaining compatibility with previous setting and command identifiers.
 - Kept the assets-folder image workflow as the default and Base64 embedding as an optional mode.
 
 ## 0.0.39

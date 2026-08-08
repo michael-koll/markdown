@@ -34,8 +34,8 @@ __export(extension_exports, {
 });
 module.exports = __toCommonJS(extension_exports);
 var vscode = __toESM(require("vscode"));
-var VIEW_TYPE = "markdownWysiwyg.editor";
-var CONFIG_SECTION = "mdominate";
+var VIEW_TYPE = "markdownPlusPlus.editor";
+var CONFIG_SECTION = "markdownPlusPlus";
 var LEGACY_CONFIG_SECTION = "markdownWysiwyg";
 var reservedImageTargets = /* @__PURE__ */ new Set();
 function activate(context) {
@@ -103,7 +103,7 @@ function activate(context) {
                   applyingChange = false;
                 }
               }).catch((error) => {
-                console.error("MDominate save error:", error);
+                console.error("Markdown++ save error:", error);
                 webview.postMessage({ type: "requestSnapshot" });
               });
               return;
@@ -122,7 +122,7 @@ function activate(context) {
                   applyingChange = false;
                 }
               }).catch((error) => {
-                console.error("MDominate recovery error:", error);
+                console.error("Markdown++ recovery error:", error);
               });
               return;
             }
@@ -146,7 +146,7 @@ function activate(context) {
                 webview.postMessage({ type: "pastedImageSaved", requestId: message.requestId, markdown: `![pasted image](${relativePath})` });
               } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
-                console.error("MDominate image save error:", error);
+                console.error("Markdown++ image save error:", error);
                 webview.postMessage({ type: "pastedImageError", requestId: message.requestId, message: errorMessage });
               }
               return;
@@ -154,11 +154,11 @@ function activate(context) {
             case "rendererError": {
               if (typeof message.message !== "string") return;
               const area = typeof message.area === "string" ? message.area : "renderer";
-              void vscode.window.showErrorMessage(`MDominate ${area}: ${message.message.slice(0, 1e3)}`);
+              void vscode.window.showErrorMessage(`Markdown++ ${area}: ${message.message.slice(0, 1e3)}`);
             }
           }
         } catch (error) {
-          console.error("MDominate message handler error:", error);
+          console.error("Markdown++ message handler error:", error);
           if (message.type === "update" || message.type === "snapshot") webview.postMessage({ type: "requestSnapshot" });
         }
       };
@@ -173,7 +173,7 @@ function activate(context) {
     if (isLivePreview) await openSource(uri);
     else await vscode.commands.executeCommand("vscode.openWith", uri, VIEW_TYPE);
   };
-  context.subscriptions.push(vscode.commands.registerCommand("mdominate.toggle", toggleLivePreview));
+  context.subscriptions.push(vscode.commands.registerCommand("markdownPlusPlus.toggle", toggleLivePreview));
   context.subscriptions.push(vscode.commands.registerCommand("markdownWysiwyg.toggle", toggleLivePreview));
   const toggleImagePasteMode = async () => {
     const { uri } = getActiveMarkdownResource();
@@ -183,9 +183,9 @@ function activate(context) {
     const inspected = configuration.inspect("imagePasteMode");
     const target = inspected?.workspaceFolderValue !== void 0 ? vscode.ConfigurationTarget.WorkspaceFolder : inspected?.workspaceValue !== void 0 ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
     await configuration.update("imagePasteMode", next, target);
-    void vscode.window.showInformationMessage(`MDominate image paste mode: ${next === "assets" ? "Assets folder" : "Base64 embedding"}.`);
+    void vscode.window.showInformationMessage(`Markdown++ image paste mode: ${next === "assets" ? "Assets folder" : "Base64 embedding"}.`);
   };
-  context.subscriptions.push(vscode.commands.registerCommand("mdominate.toggleImagePasteMode", toggleImagePasteMode));
+  context.subscriptions.push(vscode.commands.registerCommand("markdownPlusPlus.toggleImagePasteMode", toggleImagePasteMode));
   context.subscriptions.push(vscode.commands.registerCommand("markdownWysiwyg.toggleImagePasteMode", toggleImagePasteMode));
   context.subscriptions.push(vscode.commands.registerCommand("markdownWysiwyg.toggleEmbedPastedImages", toggleImagePasteMode));
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor((editor) => {
@@ -203,7 +203,10 @@ function getConfigurationValue(key, fallback, uri) {
   const configuration = vscode.workspace.getConfiguration(CONFIG_SECTION, uri);
   const inspected = configuration.inspect(key);
   const hasCurrentValue = inspected?.globalValue !== void 0 || inspected?.workspaceValue !== void 0 || inspected?.workspaceFolderValue !== void 0;
-  return hasCurrentValue ? configuration.get(key, fallback) : vscode.workspace.getConfiguration(LEGACY_CONFIG_SECTION, uri).get(key, fallback);
+  return hasCurrentValue ? configuration.get(key, fallback) : vscode.workspace.getConfiguration(LEGACY_CONFIG_SECTION, uri).get(
+    key,
+    fallback
+  );
 }
 async function savePastedImage(documentUri, dataUrl, originalName) {
   const match = dataUrl.match(/^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=\r\n]+)$/i);
@@ -280,14 +283,14 @@ async function enableWordWrap(uri) {
   }
 }
 function enableWordWrapSafely(uri) {
-  void enableWordWrap(uri).catch((error) => console.error("MDominate word wrap configuration error:", error));
+  void enableWordWrap(uri).catch((error) => console.error("Markdown++ word wrap configuration error:", error));
 }
 function getHtml(webview, extensionUri) {
   const script = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "webview.js"));
   const nonce = String(Date.now()) + Math.random().toString(36).slice(2);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} data: blob:; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
-  <title>MDominate</title><style>${styles()}${themeStyles()}</style></head><body>
+  <title>Markdown++</title><style>${styles()}${themeStyles()}</style></head><body>
   <main id="editor" aria-label="Markdown live preview"></main><script nonce="${nonce}" src="${script}"></script></body></html>`;
 }
 function styles() {

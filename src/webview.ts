@@ -256,7 +256,7 @@ const reportedRenderErrors = new Set<string>();
 
 function reportRenderError(area: string, error: unknown): void {
   const message = (error instanceof Error ? error.message : String(error)).slice(0, 1_000);
-  console.error(`MDominate ${area} error:`, error);
+  console.error(`Markdown++ ${area} error:`, error);
   const key = `${area}:${message}`;
   if (reportedRenderErrors.has(key)) return;
   if (reportedRenderErrors.size >= 50) reportedRenderErrors.delete(reportedRenderErrors.values().next().value!);

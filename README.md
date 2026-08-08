@@ -1,8 +1,8 @@
-# MDominate
+# Markdown++
 
 **An Obsidian-like live WYSIWYG Markdown editor for Visual Studio Code.**
 
-MDominate turns standard Markdown files into a continuous Live Preview editor. The document stays readable while you type: Markdown syntax is hidden in rendered content and revealed only for the element you are editing or the lines you select.
+Markdown++ turns standard Markdown files into a continuous Live Preview editor. The document stays readable while you type: Markdown syntax is hidden in rendered content and revealed only for the element you are editing or the lines you select.
 
 Your files remain ordinary Markdown. Switch between Live Preview and the source editor at any time with the preview button in the editor title.
 
@@ -22,11 +22,11 @@ Your files remain ordinary Markdown. Switch between Live Preview and the source 
 ## Getting Started
 
 1. Open a `.md` file.
-2. Click the preview icon in the editor title, or run **MDominate: Toggle Live Preview** from the Command Palette.
+2. Click the preview icon in the editor title, or run **Markdown++: Toggle Live Preview** from the Command Palette.
 3. Click any rendered element to edit its Markdown source in place.
 4. Use the same editor-title button to return to the regular source editor.
 
-MDominate does not replace or convert the file format. Changes made in either view are saved to the same Markdown document.
+Markdown++ does not replace or convert the file format. Changes made in either view are saved to the same Markdown document.
 
 ## Slash Commands
 
@@ -48,7 +48,7 @@ For a custom table, type its dimensions directly and press Enter. For example, `
 
 ### Assets folder (default)
 
-When you paste an image, MDominate creates an `assets` folder beside the current Markdown file, saves the image there, and inserts a native relative Markdown link:
+When you paste an image, Markdown++ creates an `assets` folder beside the current Markdown file, saves the image there, and inserts a native relative Markdown link:
 
 ```markdown
 ![pasted image](assets/image-20260807-145500.png)
@@ -60,7 +60,7 @@ File names are collision-safe, and large clipboard images are supported.
 
 Base64 mode stores the complete image directly in the Markdown document as a `data:image/...;base64,...` URL. This makes the document self-contained, but can make its source substantially larger.
 
-Run **MDominate: Toggle Image Paste Mode** from the Command Palette to switch modes. The selected mode is saved in the applicable VS Code configuration scope.
+Run **Markdown++: Toggle Image Paste Mode** from the Command Palette to switch modes. The selected mode is saved in the applicable VS Code configuration scope.
 
 ## Editing and Navigation
 
@@ -73,7 +73,7 @@ Run **MDominate: Toggle Image Paste Mode** from the Command Palette to switch mo
 
 ## Supported Markdown
 
-MDominate focuses on standard CommonMark and common GitHub Flavored Markdown features:
+Markdown++ focuses on standard CommonMark and common GitHub Flavored Markdown features:
 
 - ATX headings (`#` through `######`) and Setext headings
 - Bold, italic, bold italic, strikethrough, escapes, and hard line breaks
@@ -92,18 +92,18 @@ The Live Preview is designed around native Markdown. Image resizing metadata and
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `mdominate.imagePasteMode` | `assets` | Saves pasted images in a neighboring `assets` folder or embeds them as `base64`. |
-| `mdominate.enableMarkdownWordWrap` | `true` | Enables word wrapping when Markdown files are opened in the regular source editor. |
+| `markdownPlusPlus.imagePasteMode` | `assets` | Saves pasted images in a neighboring `assets` folder or embeds them as `base64`. |
+| `markdownPlusPlus.enableMarkdownWordWrap` | `true` | Enables word wrapping when Markdown files are opened in the regular source editor. |
 
-The image mode can also be changed with **MDominate: Toggle Image Paste Mode**.
+The image mode can also be changed with **Markdown++: Toggle Image Paste Mode**.
 
 ## Privacy
 
-MDominate does not send document content or telemetry to an external service. Assets-mode images remain in your local workspace; Base64-mode images remain inside the Markdown file.
+Markdown++ does not send document content or telemetry to an external service. Assets-mode images remain in your local workspace; Base64-mode images remain inside the Markdown file.
 
 ## License
 
-MDominate is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE.md). Noncommercial use, inspection, modification, and sharing are permitted. Commercial use is not permitted.
+Markdown++ is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE.md). Noncommercial use, inspection, modification, and sharing are permitted. Commercial use is not permitted.
 
 ## Release Notes
 

@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
-  <title id="title">MDominate logo</title>
+  <title id="title">Markdown++ logo</title>
   <desc id="description">A clean, traditionally proportioned hash symbol with a subtle VS Code blue gradient.</desc>
 
   <defs>
-    <linearGradient id="mdominate-gradient" x1="92" y1="52" x2="420" y2="460" gradientUnits="userSpaceOnUse">
+    <linearGradient id="markdown-plus-plus-gradient" x1="92" y1="52" x2="420" y2="460" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#29b8f2"/>
       <stop offset="0.52" stop-color="#007acc"/>
       <stop offset="1" stop-color="#005fb8"/>
     </linearGradient>
   </defs>
 
-  <path fill="url(#mdominate-gradient)" d="M166 44h64l-17 120h110l17-120h64l-17 120h73v58h-81l-10 70h75v58h-83l-17 118h-64l17-118H187l-17 118h-64l17-118H50v-58h81l10-70H66v-58h83zm39 178-10 70h110l10-70z"/>
+  <path fill="url(#markdown-plus-plus-gradient)" d="M166 44h64l-17 120h110l17-120h64l-17 120h73v58h-81l-10 70h75v58h-83l-17 118h-64l17-118H187l-17 118h-64l17-118H50v-58h81l10-70H66v-58h83zm39 178-10 70h110l10-70z"/>
 </svg>

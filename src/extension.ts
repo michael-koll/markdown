@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
-const VIEW_TYPE = 'markdownWysiwyg.editor';
-const CONFIG_SECTION = 'mdominate';
+const VIEW_TYPE = 'markdownPlusPlus.editor';
+const CONFIG_SECTION = 'markdownPlusPlus';
 const LEGACY_CONFIG_SECTION = 'markdownWysiwyg';
 type ImagePasteMode = 'assets' | 'base64';
 const reservedImageTargets = new Set<string>();
@@ -71,7 +71,7 @@ export function activate(context: vscode.ExtensionContext): void {
                   }
                 } finally { applyingChange = false; }
               }).catch(error => {
-                console.error('MDominate save error:', error);
+                console.error('Markdown++ save error:', error);
                 webview.postMessage({ type: 'requestSnapshot' });
               });
               return;
@@ -87,7 +87,7 @@ export function activate(context: vscode.ExtensionContext): void {
                   const applied = await vscode.workspace.applyEdit(edit);
                   if (!applied) throw new Error('VS Code rejected the Markdown recovery snapshot.');
                 } finally { applyingChange = false; }
-              }).catch(error => { console.error('MDominate recovery error:', error); });
+              }).catch(error => { console.error('Markdown++ recovery error:', error); });
               return;
             }
             case 'openLink': {
@@ -112,7 +112,7 @@ export function activate(context: vscode.ExtensionContext): void {
                 webview.postMessage({ type: 'pastedImageSaved', requestId: message.requestId, markdown: `![pasted image](${relativePath})` });
               } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
-                console.error('MDominate image save error:', error);
+                console.error('Markdown++ image save error:', error);
                 webview.postMessage({ type: 'pastedImageError', requestId: message.requestId, message: errorMessage });
               }
               return;
@@ -120,11 +120,11 @@ export function activate(context: vscode.ExtensionContext): void {
             case 'rendererError': {
               if (typeof message.message !== 'string') return;
               const area = typeof message.area === 'string' ? message.area : 'renderer';
-              void vscode.window.showErrorMessage(`MDominate ${area}: ${message.message.slice(0, 1_000)}`);
+              void vscode.window.showErrorMessage(`Markdown++ ${area}: ${message.message.slice(0, 1_000)}`);
             }
           }
         } catch (error) {
-          console.error('MDominate message handler error:', error);
+          console.error('Markdown++ message handler error:', error);
           if (message.type === 'update' || message.type === 'snapshot') webview.postMessage({ type: 'requestSnapshot' });
         }
       };
@@ -138,7 +138,7 @@ export function activate(context: vscode.ExtensionContext): void {
     if (isLivePreview) await openSource(uri);
     else await vscode.commands.executeCommand('vscode.openWith', uri, VIEW_TYPE);
   };
-  context.subscriptions.push(vscode.commands.registerCommand('mdominate.toggle', toggleLivePreview));
+  context.subscriptions.push(vscode.commands.registerCommand('markdownPlusPlus.toggle', toggleLivePreview));
   context.subscriptions.push(vscode.commands.registerCommand('markdownWysiwyg.toggle', toggleLivePreview));
   const toggleImagePasteMode = async () => {
     const { uri } = getActiveMarkdownResource();
@@ -150,9 +150,9 @@ export function activate(context: vscode.ExtensionContext): void {
       : inspected?.workspaceValue !== undefined ? vscode.ConfigurationTarget.Workspace
       : vscode.ConfigurationTarget.Global;
     await configuration.update('imagePasteMode', next, target);
-    void vscode.window.showInformationMessage(`MDominate image paste mode: ${next === 'assets' ? 'Assets folder' : 'Base64 embedding'}.`);
+    void vscode.window.showInformationMessage(`Markdown++ image paste mode: ${next === 'assets' ? 'Assets folder' : 'Base64 embedding'}.`);
   };
-  context.subscriptions.push(vscode.commands.registerCommand('mdominate.toggleImagePasteMode', toggleImagePasteMode));
+  context.subscriptions.push(vscode.commands.registerCommand('markdownPlusPlus.toggleImagePasteMode', toggleImagePasteMode));
   context.subscriptions.push(vscode.commands.registerCommand('markdownWysiwyg.toggleImagePasteMode', toggleImagePasteMode));
   // Keep existing keybindings and command invocations working after the command rename.
   context.subscriptions.push(vscode.commands.registerCommand('markdownWysiwyg.toggleEmbedPastedImages', toggleImagePasteMode));
@@ -179,7 +179,8 @@ function getConfigurationValue<T>(key: string, fallback: T, uri?: vscode.Uri): T
     || inspected?.workspaceFolderValue !== undefined;
   return hasCurrentValue
     ? configuration.get<T>(key, fallback)
-    : vscode.workspace.getConfiguration(LEGACY_CONFIG_SECTION, uri).get<T>(key, fallback);
+    : vscode.workspace.getConfiguration(LEGACY_CONFIG_SECTION, uri).get<T>(key,
+      fallback);
 }
 
 async function savePastedImage(documentUri: vscode.Uri, dataUrl: string, originalName: string): Promise<string> {
@@ -250,7 +251,7 @@ async function enableWordWrap(uri: vscode.Uri): Promise<void> {
 }
 
 function enableWordWrapSafely(uri: vscode.Uri): void {
-  void enableWordWrap(uri).catch(error => console.error('MDominate word wrap configuration error:', error));
+  void enableWordWrap(uri).catch(error => console.error('Markdown++ word wrap configuration error:', error));
 }
 
 function getHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
@@ -258,7 +259,7 @@ function getHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
   const nonce = String(Date.now()) + Math.random().toString(36).slice(2);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} data: blob:; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
-  <title>MDominate</title><style>${styles()}${themeStyles()}</style></head><body>
+  <title>Markdown++</title><style>${styles()}${themeStyles()}</style></head><body>
   <main id="editor" aria-label="Markdown live preview"></main><script nonce="${nonce}" src="${script}"></script></body></html>`;
 }
 

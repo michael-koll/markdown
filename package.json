@@ -1,6 +1,6 @@
 {
-  "name": "mdominate",
-  "displayName": "MDominate",
+  "name": "markdown-plus-plus",
+  "displayName": "Markdown++",
   "description": "An Obsidian-like live WYSIWYG Markdown editor for VS Code.",
   "version": "0.0.40",
   "publisher": "MichaelKoll",
@@ -46,9 +46,9 @@
     "theme": "dark"
   },
   "activationEvents": [
-    "onCustomEditor:markdownWysiwyg.editor",
-    "onCommand:mdominate.toggle",
-    "onCommand:mdominate.toggleImagePasteMode",
+    "onCustomEditor:markdownPlusPlus.editor",
+    "onCommand:markdownPlusPlus.toggle",
+    "onCommand:markdownPlusPlus.toggleImagePasteMode",
     "onCommand:markdownWysiwyg.toggle",
     "onCommand:markdownWysiwyg.toggleImagePasteMode",
     "onCommand:markdownWysiwyg.toggleEmbedPastedImages"
@@ -57,19 +57,19 @@
   "contributes": {
     "commands": [
       {
-        "command": "mdominate.toggle",
-        "title": "MDominate: Toggle Live Preview",
+        "command": "markdownPlusPlus.toggle",
+        "title": "Markdown++: Toggle Live Preview",
         "icon": "$(preview)"
       },
       {
-        "command": "mdominate.toggleImagePasteMode",
-        "title": "MDominate: Toggle Image Paste Mode"
+        "command": "markdownPlusPlus.toggleImagePasteMode",
+        "title": "Markdown++: Toggle Image Paste Mode"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "mdominate.toggle",
+          "command": "markdownPlusPlus.toggle",
           "when": "resourceExtname == .md",
           "group": "navigation@10"
         }
@@ -77,8 +77,8 @@
     },
     "customEditors": [
       {
-        "viewType": "markdownWysiwyg.editor",
-        "displayName": "MDominate Live Preview",
+        "viewType": "markdownPlusPlus.editor",
+        "displayName": "Markdown++ Live Preview",
         "selector": [
           {
             "filenamePattern": "*.md"
@@ -88,9 +88,9 @@
       }
     ],
     "configuration": {
-      "title": "MDominate",
+      "title": "Markdown++",
       "properties": {
-        "mdominate.imagePasteMode": {
+        "markdownPlusPlus.imagePasteMode": {
           "type": "string",
           "enum": [
             "assets",
@@ -103,7 +103,7 @@
           "default": "assets",
           "description": "Choose how images pasted into Live Preview are stored."
         },
-        "mdominate.enableMarkdownWordWrap": {
+        "markdownPlusPlus.enableMarkdownWordWrap": {
           "type": "boolean",
           "default": true,
           "description": "Turn on word wrap when opening Markdown in the source editor."
@@ -115,14 +115,14 @@
             "base64"
           ],
           "default": "assets",
-          "deprecationMessage": "Use mdominate.imagePasteMode instead.",
-          "description": "Legacy MDominate image paste setting."
+          "deprecationMessage": "Use markdownPlusPlus.imagePasteMode instead.",
+          "description": "Legacy Markdown++ image paste setting."
         },
         "markdownWysiwyg.enableMarkdownWordWrap": {
           "type": "boolean",
           "default": true,
-          "deprecationMessage": "Use mdominate.enableMarkdownWordWrap instead.",
-          "description": "Legacy MDominate word wrap setting."
+          "deprecationMessage": "Use markdownPlusPlus.enableMarkdownWordWrap instead.",
+          "description": "Legacy Markdown++ word wrap setting."
         }
       }
     }
